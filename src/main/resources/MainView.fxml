@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="550.0" prefWidth="800.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MainController">
+  <tabs>
+    <Tab text="Start">
+      <content>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <Separator layoutX="425.0" layoutY="-2.0" orientation="VERTICAL" prefHeight="530.0" prefWidth="6.0" AnchorPane.bottomAnchor="-7.0" AnchorPane.leftAnchor="425.0" AnchorPane.rightAnchor="369.0" AnchorPane.topAnchor="-2.0" />
+                  <Label layoutX="554.0" layoutY="14.0" text="Нештатные ситуации">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <RadioButton fx:id="rb_DUP_Failure" layoutX="664.0" layoutY="98.0" mnemonicParsing="false" text="Обнуление">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </RadioButton>
+                  <RadioButton fx:id="rb_DUS_Failure" layoutX="480.0" layoutY="98.0" mnemonicParsing="false" text="Обнуление">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </RadioButton>
+                  <Separator layoutX="428.0" layoutY="360.0" prefHeight="7.0" prefWidth="369.0" />
+                  <RadioButton fx:id="rb_DUS_sticking" layoutX="481.0" layoutY="147.0" mnemonicParsing="false" text="Залипание">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </RadioButton>
+                  <RadioButton fx:id="rb_DUP_sticking" layoutX="665.0" layoutY="147.0" mnemonicParsing="false" text="Залипание">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </RadioButton>
+                  <Separator layoutX="619.0" layoutY="69.0" orientation="VERTICAL" prefHeight="234.0" prefWidth="1.0" />
+                  <Label layoutX="514.0" layoutY="48.0" text="ДУС" AnchorPane.rightAnchor="259.0">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <Label layoutX="699.0" layoutY="48.0" text="ДУП">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <Button fx:id="btn_Start" layoutX="176.0" layoutY="108.0" mnemonicParsing="false" onAction="#showFullGraph" text="Show full graph" AnchorPane.leftAnchor="161.0" AnchorPane.rightAnchor="524.0" />
+                  <Label layoutX="451.0" layoutY="249.0" text="Время возникновения [сек]" />
+                  <TextField fx:id="tf_DUS_time" layoutX="489.0" layoutY="275.0" prefHeight="25.0" prefWidth="80.0" />
+                  <Label layoutX="636.0" layoutY="249.0" text="Время возникновения [сек]" />
+                  <TextField fx:id="tf_DUP_time" layoutX="672.0" layoutY="275.0" prefHeight="25.0" prefWidth="80.0" />
+                  <Button layoutX="598.0" layoutY="325.0" mnemonicParsing="false" onAction="#saveNeshtatAction" text="Save" />
+                  <Button layoutX="143.0" layoutY="173.0" mnemonicParsing="false" onAction="#showAccelerationSection" text="Show acceleration section" />
+                  <Button layoutX="155.0" layoutY="232.0" mnemonicParsing="false" onAction="#showBrakingSection" text="Show braking section" />
+                  <RadioButton fx:id="rb_DUS_pomeh" layoutX="492.0" layoutY="198.0" mnemonicParsing="false" text="Помеха">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </RadioButton>
+                  <RadioButton fx:id="rb_DUP_pomeh" layoutX="675.0" layoutY="198.0" mnemonicParsing="false" text="Помеха">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </RadioButton>
+                  <Separator layoutX="-3.0" layoutY="286.0" prefHeight="5.0" prefWidth="431.0" />
+                  <Button layoutX="152.0" layoutY="313.0" mnemonicParsing="false" onAction="#showActionGraph" text="Show custom graph" />
+                  <TextField fx:id="tf_From" layoutX="138.0" layoutY="364.0" prefHeight="16.0" prefWidth="60.0" AnchorPane.bottomAnchor="132.0" AnchorPane.leftAnchor="138.0" />
+                  <Label layoutX="101.0" layoutY="365.0" text="from:" AnchorPane.bottomAnchor="136.0" AnchorPane.leftAnchor="101.0">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <Label layoutX="216.0" layoutY="365.0" text="to:" AnchorPane.bottomAnchor="136.0" AnchorPane.leftAnchor="216.0">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="tf_To" layoutX="241.0" layoutY="364.0" prefWidth="60.0" AnchorPane.bottomAnchor="132.0" AnchorPane.leftAnchor="241.0" />
+                  <Label layoutX="311.0" layoutY="367.0" text="[sec]">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+               </children></AnchorPane>
+      </content>
+    </Tab>
+    <Tab text="Parameters">
+      <content>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <Label layoutX="27.0" layoutY="279.0" text="Период дискретизации [Т]" AnchorPane.bottomAnchor="225.0" />
+                  <TextField fx:id="tf_Uskor_tormozh_mahovika" layoutX="204.0" layoutY="19.0" prefHeight="25.0" prefWidth="110.0" AnchorPane.bottomAnchor="399.0" AnchorPane.leftAnchor="204.0" AnchorPane.rightAnchor="486.0" />
+                  <Label layoutX="25.0" layoutY="55.0" text="Максимальное ускорение" AnchorPane.bottomAnchor="449.0" />
+                  <TextField fx:id="tf_Max_razgon_mahovika" layoutX="204.0" layoutY="59.0" prefHeight="25.0" prefWidth="111.0" AnchorPane.bottomAnchor="437.0" AnchorPane.leftAnchor="204.0" AnchorPane.rightAnchor="486.0" />
+                  <Label layoutX="536.0" layoutY="9.0" text="Коэффициенты">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <Separator layoutX="369.0" layoutY="2.0" orientation="VERTICAL" prefHeight="199.0" prefWidth="3.0" />
+                  <Separator layoutX="662.0" layoutY="51.0" orientation="VERTICAL" prefHeight="87.0" prefWidth="5.0" />
+                  <Label layoutX="556.0" layoutY="44.0" text="Участок разгона" />
+                  <Label layoutX="676.0" layoutY="44.0" text="Участок торможения" />
+                  <Label layoutX="415.0" layoutY="78.0" text="Перед углом [A0]" AnchorPane.bottomAnchor="426.0" />
+                  <TextField fx:id="tf_Koef_razgon_A0" layoutX="571.0" layoutY="74.0" prefHeight="25.0" prefWidth="67.0" AnchorPane.bottomAnchor="422.0" AnchorPane.rightAnchor="162.0" />
+                  <Label layoutX="421.0" layoutY="104.0" text="Перед угловой" AnchorPane.bottomAnchor="400.0" />
+                  <Label layoutX="25.0" layoutY="72.0" text="при разгоне маховика [w']" AnchorPane.bottomAnchor="432.0" />
+                  <Label layoutX="421.0" layoutY="123.0" text="скоростью [A1]" AnchorPane.bottomAnchor="381.0" />
+                  <Label layoutX="30.0" layoutY="95.0" text="Ускорение торможения" AnchorPane.bottomAnchor="409.0" />
+                  <Label layoutX="61.0" layoutY="107.0" text="маховика [w']" AnchorPane.bottomAnchor="397.0" />
+                  <TextField fx:id="tf_Moment_inercii_mahovika" layoutX="204.0" layoutY="19.0" prefHeight="25.0" prefWidth="110.0" AnchorPane.bottomAnchor="477.0" AnchorPane.leftAnchor="204.0" AnchorPane.rightAnchor="486.0" />
+                  <Label layoutX="10.0" layoutY="135.0" text="Возмущающее ускорение [Mв]" AnchorPane.bottomAnchor="369.0" />
+                  <TextField fx:id="tf_Vozmush_uskor" layoutX="204.0" layoutY="131.0" prefHeight="25.0" prefWidth="49.0" AnchorPane.bottomAnchor="365.0" AnchorPane.leftAnchor="204.0" AnchorPane.rightAnchor="486.0" />
+                  <Label layoutX="425.0" layoutY="146.0" text="Значение для" AnchorPane.bottomAnchor="358.0" />
+                  <TextField fx:id="tf_Koef_Rele_A" layoutX="572.0" layoutY="151.0" prefHeight="25.0" prefWidth="186.0" AnchorPane.bottomAnchor="345.0" />
+                  <Label layoutX="401.0" layoutY="162.0" text="релейной функции [A]" AnchorPane.bottomAnchor="342.0" />
+                  <Separator layoutX="369.0" layoutY="199.0" prefHeight="5.0" prefWidth="431.0" />
+                  <Label layoutX="15.0" layoutY="171.0" text="Момент инерции спутника [Jz]" AnchorPane.bottomAnchor="333.0" />
+                  <TextField fx:id="tf_Moment_inercii_sputnika" layoutX="204.0" layoutY="167.0" prefHeight="25.0" prefWidth="49.0" AnchorPane.bottomAnchor="329.0" AnchorPane.leftAnchor="204.0" AnchorPane.rightAnchor="486.0" />
+                  <Label layoutX="43.0" layoutY="205.0" text="Масса спутника [Mz]" AnchorPane.bottomAnchor="299.0" />
+                  <TextField fx:id="tf_Massa_sputnika" layoutX="204.0" layoutY="201.0" prefHeight="25.0" prefWidth="49.0" AnchorPane.bottomAnchor="295.0" AnchorPane.leftAnchor="204.0" AnchorPane.rightAnchor="486.0" />
+                  <Label layoutX="40.0" layoutY="242.0" text="Размер спутника [Az]" AnchorPane.bottomAnchor="262.0" />
+                  <TextField fx:id="tf_Radius_mahovika" layoutX="204.0" layoutY="238.0" prefHeight="25.0" prefWidth="49.0" AnchorPane.bottomAnchor="27.0" AnchorPane.leftAnchor="204.0" AnchorPane.rightAnchor="486.0" />
+                  <TextField fx:id="tf_Razmer_sputnika" layoutX="204.0" layoutY="276.0" prefHeight="25.0" prefWidth="49.0" AnchorPane.bottomAnchor="258.0" AnchorPane.leftAnchor="204.0" AnchorPane.rightAnchor="486.0" />
+                  <Label layoutX="12.0" layoutY="23.0" text="Момент инерции маховика [Jm]" AnchorPane.bottomAnchor="481.0" />
+                  <TextField fx:id="tf_T_time" layoutX="204.0" layoutY="315.0" prefHeight="25.0" prefWidth="49.0" AnchorPane.bottomAnchor="221.0" AnchorPane.leftAnchor="204.0" AnchorPane.rightAnchor="486.0" />
+                  <Label layoutX="14.0" layoutY="311.0" text="Максимальный кинетический" AnchorPane.bottomAnchor="193.0" />
+                  <Label layoutX="26.0" layoutY="327.0" text="момент маховика [Hmax]" AnchorPane.bottomAnchor="177.0" />
+                  <Label layoutX="53.0" layoutY="357.0" text="Тяга УРД [Pурд]" AnchorPane.bottomAnchor="147.0" />
+                  <TextField fx:id="tf_Max_kinetich_m_mahovika" layoutX="204.0" layoutY="353.0" prefHeight="25.0" prefWidth="49.0" AnchorPane.bottomAnchor="181.0" AnchorPane.leftAnchor="204.0" AnchorPane.rightAnchor="486.0" />
+                  <Label layoutX="37.0" layoutY="397.0" text="Плечо силы тяги [Lm]" AnchorPane.bottomAnchor="107.0" />
+                  <TextField fx:id="tf_Tyaga_URD" layoutX="204.0" layoutY="393.0" prefHeight="25.0" prefWidth="49.0" AnchorPane.bottomAnchor="143.0" AnchorPane.leftAnchor="204.0" AnchorPane.rightAnchor="486.0" />
+                  <TextField fx:id="tf_Plecho_sili_tyagi" layoutX="204.0" layoutY="431.0" prefHeight="25.0" prefWidth="49.0" AnchorPane.bottomAnchor="103.0" AnchorPane.leftAnchor="204.0" AnchorPane.rightAnchor="486.0" />
+                  <Label layoutX="12.0" layoutY="424.0" text="Максимальный управляющий" AnchorPane.bottomAnchor="80.0" />
+                  <Label layoutX="15.0" layoutY="444.0" text="момент маховика [Mупрmax]" AnchorPane.bottomAnchor="60.0" />
+                  <Label layoutX="40.0" layoutY="473.0" text="Радиус маховика [R]" AnchorPane.bottomAnchor="31.0" />
+                  <TextField fx:id="tf_Max_uprvl_moment_mahovika" layoutX="204.0" layoutY="432.0" prefHeight="25.0" prefWidth="110.0" AnchorPane.bottomAnchor="64.0" AnchorPane.leftAnchor="204.0" AnchorPane.rightAnchor="486.0" />
+                  <TextField fx:id="tf_Koef_razgon_A1" layoutX="571.0" layoutY="110.0" prefHeight="25.0" prefWidth="67.0" AnchorPane.bottomAnchor="386.0" />
+                  <TextField fx:id="tf_Koef_tormozh_A0" layoutX="690.0" layoutY="74.0" prefHeight="25.0" prefWidth="67.0" AnchorPane.bottomAnchor="422.0" AnchorPane.rightAnchor="43.0" />
+                  <TextField fx:id="tf_Koef_tormozh_A1" layoutX="690.0" layoutY="110.0" prefHeight="25.0" prefWidth="67.0" AnchorPane.bottomAnchor="386.0" />
+                  <Button fx:id="btn_Set_Default" layoutX="601.0" layoutY="461.0" mnemonicParsing="false" onAction="#setDefaultAction" text="Set Default" AnchorPane.bottomAnchor="35.0" />
+                  <Button fx:id="btnSave" layoutX="703.0" layoutY="461.0" mnemonicParsing="false" onAction="#saveAction" text="Save" AnchorPane.bottomAnchor="35.0" />
+               </children></AnchorPane>
+      </content>
+    </Tab>
+  </tabs>
+</TabPane>
