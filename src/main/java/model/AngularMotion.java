@@ -14,32 +14,34 @@ public class AngularMotion {
     private double fi;
     private double f;
 
-    private double ex = 0.01; // начальное отклонение угла
-    private double edx = 0; // начальная угловая скорость
-    private double ew = 0 ; // начальная угловая скорость маховика
-    private double ev = 0; // начальная линейная скорость маховика
-    private double edw;
-    private double eM_f;
-    private double edt = 1;
-    private double efi;
-    private double ef;
+    private double rx = 0.01; // начальное отклонение угла
+    private double rdx = 0; // начальная угловая скорость
+    private double rw = 0 ; // начальная угловая скорость маховика
+    private double rv = 0; // начальная линейная скорость маховика
+    private double rdw;
+    private double rM_f;
+    private double rdt = 1;
+    private double rfi;
+    private double rf;
 
     private double prevX = 0;
     private double prevDx = 0;
+    private double prevRX = 0;
+    private double prevRDx = 0;
     private boolean dusFailure = false;
     private boolean dusStick = false;
     private boolean dusPomeh = false;
     private boolean dupFailure = false;
     private boolean dupStick = false;
     private boolean dupPomeh = false;
-    private double dupFailureValue = 0;
     private double dupStickValue = 0;
-    private double dupPomehValue = 0;
-    private double dusFailureValue = 0;
     private double dusStickValue = 0;
-    private double dusPomehValue = 0;
     private double discreteX;
     private double discreteDx;
+    private double discreteRX;
+    private double discreteRDx;
+    private boolean isSetDupPomeh = false;
+    private boolean isSetDusPomeh = false;
 
     public void setDiscreteX() {
         this.discreteX = this.x;
@@ -49,15 +51,14 @@ public class AngularMotion {
         this.discreteDx = this.dx;
     }
 
-    public double getDiscreteX() {
-        return discreteX;
-    }
 
-    public double getDiscreteDx() {
-        return discreteDx;
-    }
+
 
     public void clearAllValues() {
+        discreteX = 0;
+        discreteDx = 0;
+        prevRX = 0;
+        prevRDx = 0;
         prevX = 0;
         prevDx = 0;
         M_f = 0;
@@ -66,8 +67,16 @@ public class AngularMotion {
         dw = 0;
         w = 0;
         v = 0;
-        x = 0;
+        x = 0.01;
         dx = 0;
+        rx = 0.01;
+        rdx = 0;
+        rw = 0;
+        rv = 0;
+        rdw = 0;
+        rM_f = 0;
+        rf = 0;
+        rfi = 0;
         dusFailure = false;
         dusStick = false;
         dusPomeh = false;
@@ -76,30 +85,14 @@ public class AngularMotion {
         dupPomeh = false;
     }
 
-    public AngularMotion(Satellite satellite) {
-//        w = (satellite.getA0() * this.x + satellite.getA1() * this.dx);
-//        v = this.w * satellite.getR();
+    public AngularMotion() {
     }
 
-    public void accelerationFlywheel(Satellite satellite) { //функция участка разгона
-       // угловое ускорение маховика равно ... или 0, если достигнута максимальная скрость
-        if (w <= satellite.getW_max()) {
-            dw = satellite.getA0() * this.discreteX + satellite.getA1() * this.discreteDx;
-        } else {
-            dw = 0; // по формуле (4)
-        }
-        this.w += dw * dt; //вычисление угловой скорости маховика по угловому ускорению
-        this.v = this.w * satellite.getR(); // вычисление линейной скорости маховика
-        M_f = satellite.getJ_m() * dw ; // момент маховика
-//        this.x += dx * dt; // по "жёлтой" формуле X1(n+1)
-//        this.dx += dt * (satellite.getM_p_() - (M_f / satellite.getJ_z())); // по "жёлтой" формуле X2(n+1) для уравнения (3)
-    }
 
-    public void rotationSatelliteOnAcceleration(Satellite satellite, String error, double errorValue) {
-        //todo В этот метод передать флаг ошибки и if true изменять ошибочно значения согласно ошибке
+
+    public void setError(String error, double errorValue) {
         switch (error) {
             case "dusFailure": {
-//                dusFailureValue = errorValue;
                 dusFailure = true;
                 break;
             }
@@ -109,12 +102,10 @@ public class AngularMotion {
                 break;
             }
             case "dusPomeh": {
-//                dusPomehValue = errorValue;
                 dusPomeh = true;
                 break;
             }
             case "dupFailure": {
-//                dupFailureValue = errorValue;
                 dupFailure = true;
                 break;
             }
@@ -124,37 +115,40 @@ public class AngularMotion {
                 break;
             }
             case "dupPomeh": {
-//                dupPomehValue = errorValue;
                 dupPomeh = true;
                 break;
             }
-            default: {
-
+            case "no": {
+                dupFailure = false;
+                dupStick = false;
+                dupPomeh = false;
+                dusFailure = false;
+                dusStick = false;
+                dusPomeh = false;
                 break;
             }
         }
+    }
+
+    //Вычсиление нормальных значений
+    //--------------------------------------------------------------------------------------------
+    public void accelerationFlywheel(Satellite satellite) { //функция участка разгона
+        // угловое ускорение маховика равно ... или 0, если достигнута максимальная скрость
+        if (w <= satellite.getW_max()) {
+            dw = satellite.getA0() * this.discreteX + satellite.getA1() * this.discreteDx;
+        } else {
+            dw = 0; // по формуле (4)
+        }
+        this.w += dw * dt; //вычисление угловой скорости маховика по угловому ускорению
+        this.v = this.w * satellite.getR(); // вычисление линейной скорости маховика
+        M_f = satellite.getJ_m() * dw ; // момент маховика
+    }
+
+    public void rotationSatelliteOnAcceleration(Satellite satellite) {
         prevX = this.x;
         prevDx = this.dx;
         this.x += dx * dt; // по "жёлтой" формуле X1(n+1)
         this.dx += dt * (satellite.getM_p_() - (M_f / satellite.getJ_z()));
-    }
-
-
-
-    public void eylerRotateOnAcc(Satellite satellite) {
-
-    }
-
-    public void eylerRotateOnBr(Satellite satellite) {
-
-    }
-
-    public double getPrevX() {
-        return prevX;
-    }
-
-    public double getPrevDx() {
-        return prevDx;
     }
 
     public void brakingFlywheel(Satellite satellite) { // функция участка торможения
@@ -167,55 +161,138 @@ public class AngularMotion {
         } else {
             f = 0;
         }
-//        this.x += this.dx * dt ; // по "жёлтой" формуле X1(n+1)
-//        this.dx += dt * (satellite.getM_p_() + satellite.getM_b_() - satellite.getM_rc_() * f) ; // по "жёлтой" формуле X2(n+1) для уравнения (5)
     }
 
-    public void rotationSatelliteOnBracking(Satellite satellite, String error, double errorValue) {
-        //todo В этот метод передать флаг ошибки и if true изменять ошибочно значения согласно ошибке
-
-        switch (error) {
-            case "dusFailure": {
-//                dusFailureValue = errorValue;
-                dusFailure = true;
-                break;
-            }
-            case "dusStick": {
-                dusStickValue = errorValue;
-                dusStick = true;
-                break;
-            }
-            case "dusPomeh": {
-//                dusPomehValue = errorValue;
-                dusPomeh = true;
-                break;
-            }
-            case "dupFailure": {
-//                dupFailureValue = errorValue;
-                dupFailure = true;
-                break;
-            }
-            case "dupStick": {
-                dupStickValue = errorValue;
-                dupStick = true;
-                break;
-            }
-            case "dupPomeh": {
-//                dupPomehValue = errorValue;
-                dupPomeh = true;
-                break;
-            }
-            default: {
-                 // по "жёлтой" формуле X2(n+1) для уравнения (5)
-                break;
-            }
-        }
+    public void rotationSatelliteOnBracking(Satellite satellite) {
         prevX = this.x;
         prevDx = this.dx;
         this.x += this.dx * dt; // по "жёлтой" формуле X1(n+1)
         this.dx += dt * (satellite.getM_p_() + satellite.getM_b_() - satellite.getM_rc_() * f);
     }
+    //--------------------------------------------------------------------------------------------
 
+    public void setDiscreteRx() {
+        setErrorValue();
+        this.discreteRX = this.rx;
+    }
+
+    public void setDiscreteRdx() {
+        setErrorValue();
+        this.discreteRDx = this.rdx;
+    }
+
+    //Вычисление значений с ошибкой
+    //--------------------------------------------------------------------------------------------
+
+    public void rAccelerationFlywheel(Satellite satellite, boolean isSwitch) { //функция участка разгона
+        if (!isSwitch) {
+            // угловое ускорение маховика равно ... или 0, если достигнута максимальная скрость
+            if (rw <= satellite.getW_max()) {
+                rdw = satellite.getA0() * this.discreteRX + satellite.getA1() * this.discreteRDx;
+            } else {
+                rdw = 0; // по формуле (4)
+            }
+            this.rw += rdw * rdt; //вычисление угловой скорости маховика по угловому ускорению
+            this.rv = this.rw * satellite.getR(); // вычисление линейной скорости маховика
+            rM_f = satellite.getJ_m() * rdw; // момент маховика
+        } else {
+            rw = w;
+            rdw = dw;
+            rv = v;
+            rM_f = M_f;
+        }
+    }
+
+    public void rBrakingFlywheel(Satellite satellite, boolean isSwitch) { // функция участка торможения
+        if (!isSwitch) {
+            this.rw -= satellite.getW_1_b() * rdt; // вычисление угловой скорости маховикапо угловому ускорению торможения
+            this.rv = this.rw * satellite.getR(); // вычисление линейной скорости маховика
+            rfi = satellite.getK0() * this.discreteRX + satellite.getK1() * this.discreteRDx; // вычисление фи по формуле (7)
+            // релейная функция, если фи по модулю > a, то 1/-1, в зависимости от знака фи, иначе 0
+            if (abs(rfi) > satellite.getA()) {
+                rf = Math.copySign(1, rfi);
+            } else {
+                rf = 0;
+            }
+        } else {
+            rw = w;
+            rv = v;
+            rfi = fi;
+            rf = f;
+        }
+    }
+
+    public void rRotationSatelliteOnAcceleration(Satellite satellite, boolean isSwitch) {
+        if (!isSwitch) {
+            this.rx += rdx * rdt; // по "жёлтой" формуле X1(n+1)
+            this.rdx += rdt * (satellite.getM_p_() - (rM_f / satellite.getJ_z()));
+            setErrorValue();
+        } else {
+            rx = x;
+            rdx = dx;
+        }
+
+    }
+
+    public void rRotationSatelliteOnBracking(Satellite satellite, boolean isSwitch) {
+        if (!isSwitch) {
+            this.rx += this.rdx * rdt; // по "жёлтой" формуле X1(n+1)
+            this.rdx += rdt * (satellite.getM_p_() + satellite.getM_b_() - satellite.getM_rc_() * rf);
+            setErrorValue();
+        }
+        else {
+            this.rx = x;
+            this.rdx = dx;
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------
+
+
+    public void setErrorValue() {
+        if (dupFailure) this.rx = (1 - (Math.random()/10000 + 0.9999));
+        else if (dupStick) this.rx = dupStickValue;
+        else if (isSetDupPomeh) {
+            this.rx = x;
+            isSetDupPomeh = false;
+        }
+        else if (dupPomeh) {
+            dupPomeh = false;
+            this.rx = prevRX*(Math.random() + 1.3);
+            isSetDupPomeh = true;
+        }
+        if (dusFailure) this.rdx = (1 - (Math.random()/10000 + 0.9999));
+        else if (dusStick) this.rdx = dusStickValue;
+        else if (isSetDusPomeh) {
+            this.rdx = dx;
+            isSetDusPomeh = false;
+        }
+        else if (dusPomeh) {
+            dusPomeh = false;
+            this.rdx = prevRDx*(Math.random() + 3);
+            isSetDusPomeh = true;
+        }
+        prevRX = this.rx;
+        prevRDx = this.rdx;
+    }
+
+    public double getRx() {
+        setErrorValue();
+        return rx;
+    }
+
+    public double getRdx() {
+        setErrorValue();
+        return rdx;
+    }
+
+    public double getPrevX() {
+        return prevX;
+    }
+
+    public double getPrevDx() {
+        return prevDx;
+    }
 
     public double getX() {
         if (dupFailure) return (1 - (Math.random()/10000 + 0.9999));
@@ -228,33 +305,6 @@ public class AngularMotion {
     }
 
 
-    public void setX(double x) {
-        this.x = x;
-    }
-
-    public boolean isDusFailure() {
-        return dusFailure;
-    }
-
-    public boolean isDusStick() {
-        return dusStick;
-    }
-
-    public boolean isDusPomeh() {
-        return dusPomeh;
-    }
-
-    public boolean isDupFailure() {
-        return dupFailure;
-    }
-
-    public boolean isDupStick() {
-        return dupStick;
-    }
-
-    public boolean isDupPomeh() {
-        return dupPomeh;
-    }
 
     public double getDx() {
         if (dusFailure) return (1 - (Math.random()/10000 + 0.9999));
@@ -274,91 +324,16 @@ public class AngularMotion {
         return this.dx;
     }
 
-    public void setDusFailure(boolean dusFailure) {
-        this.dusFailure = dusFailure;
-    }
 
-    public void setDusStick(boolean dusStick) {
-        this.dusStick = dusStick;
-    }
-
-    public void setDusPomeh(boolean dusPomeh) {
-        this.dusPomeh = dusPomeh;
-    }
-
-    public void setDupFailure(boolean dupFailure) {
-        this.dupFailure = dupFailure;
-    }
-
-    public void setDupStick(boolean dupStick) {
-        this.dupStick = dupStick;
-    }
-
-    public void setDupPomeh(boolean dupPomeh) {
-        this.dupPomeh = dupPomeh;
-    }
-
-    public void setDx(double dx) {
-        this.dx = dx;
-    }
 
     public double getW() {
         return w;
     }
 
-    public void setW(double w) {
-        this.w = w;
-    }
 
     public double getV() {
         return v;
     }
 
-    public void setV(double v) {
-        this.v = v;
-    }
 
-    public double getDw() {
-        return dw;
-    }
-
-    public void setDw(double dw) {
-        this.dw = dw;
-    }
-
-    public double getM_f() {
-        return M_f;
-    }
-
-    public void setM_f(double m_f) {
-        M_f = m_f;
-    }
-
-    public double getDt() {
-        return dt;
-    }
-
-    public void setDt(double dt) {
-        this.dt = dt;
-    }
-
-    public double getFi() {
-        return fi;
-    }
-
-    public void setFi(double fi) {
-        this.fi = fi;
-    }
-
-    public double getF() {
-        return f;
-    }
-
-    public void setF(double f) {
-        this.f = f;
-    }
-
-    public void setDupErrorValue(double dupStickValue) {
-        this.dupStickValue = dupStickValue;
-    }
 }
