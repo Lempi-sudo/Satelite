@@ -42,6 +42,52 @@ public class AngularMotion {
     private double discreteRDx;
     private boolean isSetDupPomeh = false;
     private boolean isSetDusPomeh = false;
+    private double dus = 0;
+    private double dup = 0.01;
+    private double disXbc = 0;
+    private double disDXbc = 0;
+    private double t = 0;
+    private double p_err_t = 0;
+    private double s_err_t = 0;
+    boolean flag = false;
+
+    public double getDus() {
+        setErrorValue(false);
+        return dus;
+    }
+
+    public double getDup() {
+        setErrorValue(true);
+        return dup;
+    }
+
+    public double getDiscreteX() {
+        return discreteX;
+    }
+
+    public double getDiscreteDx() {
+        return discreteDx;
+    }
+
+    public void setT(double t) {
+        this.t = t;
+    }
+
+    public void setP_err_t(double p_err_t) {
+        this.p_err_t = p_err_t;
+    }
+
+    public void setS_err_t(double s_err_t) {
+        this.s_err_t = s_err_t;
+    }
+
+    public double getDisXbc() {
+        return disXbc;
+    }
+
+    public double getDisDXbc() {
+        return disDXbc;
+    }
 
     public void setDiscreteX() {
         this.discreteX = this.x;
@@ -51,7 +97,8 @@ public class AngularMotion {
         this.discreteDx = this.dx;
     }
 
-
+    public void setDisXbc() { this.disXbc = this.rx; }
+    public void setDisDXbc() { this.disDXbc = this.rdx; }
 
 
     public void clearAllValues() {
@@ -83,6 +130,8 @@ public class AngularMotion {
         dupFailure = false;
         dupStick = false;
         dupPomeh = false;
+        isSetDupPomeh = false;
+        isSetDusPomeh = false;
     }
 
     public AngularMotion() {
@@ -171,14 +220,22 @@ public class AngularMotion {
     }
     //--------------------------------------------------------------------------------------------
 
+    public void setDus(double dus) {
+        this.dus = dus;
+    }
+
+    public void setDup(double dup) {
+        this.dup = dup;
+    }
+
     public void setDiscreteRx() {
-        setErrorValue();
-        this.discreteRX = this.rx;
+        setErrorValue(true);
+        this.discreteRX = this.dup;
     }
 
     public void setDiscreteRdx() {
-        setErrorValue();
-        this.discreteRDx = this.rdx;
+        setErrorValue(false);
+        this.discreteRDx = this.dus;
     }
 
     //Вычисление значений с ошибкой
@@ -226,63 +283,71 @@ public class AngularMotion {
         if (!isSwitch) {
             this.rx += rdx * rdt; // по "жёлтой" формуле X1(n+1)
             this.rdx += rdt * (satellite.getM_p_() - (rM_f / satellite.getJ_z()));
-            setErrorValue();
+//            setErrorValue();
         } else {
             rx = x;
             rdx = dx;
         }
-
+        prevRX = this.rx;
+        prevRDx = this.rdx;
     }
 
     public void rRotationSatelliteOnBracking(Satellite satellite, boolean isSwitch) {
         if (!isSwitch) {
             this.rx += this.rdx * rdt; // по "жёлтой" формуле X1(n+1)
             this.rdx += rdt * (satellite.getM_p_() + satellite.getM_b_() - satellite.getM_rc_() * rf);
-            setErrorValue();
+//            setErrorValue();
         }
         else {
             this.rx = x;
             this.rdx = dx;
         }
-    }
-
-    //--------------------------------------------------------------------------------------------
-
-
-    public void setErrorValue() {
-        if (dupFailure) this.rx = (1 - (Math.random()/10000 + 0.9999));
-        else if (dupStick) this.rx = dupStickValue;
-        else if (isSetDupPomeh) {
-            this.rx = x;
-            isSetDupPomeh = false;
-        }
-        else if (dupPomeh) {
-            dupPomeh = false;
-            this.rx = prevRX*(Math.random() + 1.3);
-            isSetDupPomeh = true;
-        }
-        if (dusFailure) this.rdx = (1 - (Math.random()/10000 + 0.9999));
-        else if (dusStick) this.rdx = dusStickValue;
-        else if (isSetDusPomeh) {
-            this.rdx = dx;
-            isSetDusPomeh = false;
-        }
-        else if (dusPomeh) {
-            dusPomeh = false;
-            this.rdx = prevRDx*(Math.random() + 3);
-            isSetDusPomeh = true;
-        }
         prevRX = this.rx;
         prevRDx = this.rdx;
     }
 
+//--------------------------------------------------------------------------------------------
+
+
+
+    public double getrM_f() {
+        return rM_f;
+    }
+
+    public void setErrorValue(boolean dup) {
+        this.dup = rx;
+        this.dus = rdx;
+        if (dup) {
+            if (dupFailure) this.dup = (1 - (Math.random() / 10000 + 0.9999));
+            if (dupStick) this.dup = dupStickValue;
+            if (t == p_err_t) {
+                this.dup = rx * 3;
+                flag = true;
+            }
+            if (t > p_err_t && flag) this.dup = x;
+
+        }
+        else {
+            if (dusFailure) this.dus = (1 - (Math.random() / 10000 + 0.9999));
+            else if (dusStick) this.dus = dusStickValue;
+            else if (isSetDusPomeh) {
+                this.dus = dx;
+                isSetDusPomeh = false;
+            } else if (dusPomeh) {
+                dusPomeh = false;
+                this.dus = prevRDx * (Math.random() + 3);
+                isSetDusPomeh = true;
+            }
+        }
+    }
+
     public double getRx() {
-        setErrorValue();
+//        setErrorValue(true);
         return rx;
     }
 
     public double getRdx() {
-        setErrorValue();
+//        setErrorValue(false);
         return rdx;
     }
 

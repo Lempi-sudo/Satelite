@@ -62,9 +62,9 @@ public class ChartsController implements Initializable {
         for (int i = (int) minX; i < maxX; ++i) {
             series1.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), yv_plot.get(i)));
             series2.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), yx_plot.get(i)));
-//            series3.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), ex_plot.get(i)));
+            series3.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), ex_plot.get(i)));
             series4.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), ydx_plot.get(i)));
-//            series5.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), edx_plot.get(i)));
+            series5.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), edx_plot.get(i)));
             series6.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), yxm_plot.get(i)));
             series7.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), ydxm_plot.get(i)));
             series8.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), rx_plot.get(i)));
@@ -72,7 +72,7 @@ public class ChartsController implements Initializable {
 
         }
         chart_razgon.getData().clear();
-        chart_razgon.getData().addAll(series1, series2, series4, series6, series7, series8, series9);
+        chart_razgon.getData().addAll(series1, series2,  series4, series6, series7);
 
         chart_razgon.setHorizontalGridLinesVisible(false);
         chart_razgon.setVerticalGridLinesVisible(false);
@@ -94,31 +94,31 @@ public class ChartsController implements Initializable {
         series2 = new XYChart.Series();
         series2.setName("ДУП");
         series3 = new XYChart.Series();
-        series3.setName("Интеграл Эйлера по углу");
+        series3.setName("Интеграл ДУС по Эйлеру");
         series4 = new XYChart.Series();
         series4.setName("ДУС");
         series5 = new XYChart.Series();
-        series5.setName("Интеграл Эйлера по угловой скорости");
+        series5.setName("Производная ДУП по Эйлеру");
         series6 = new XYChart.Series();
-        series6.setName("Угол ошиб отклонения спутника");
+        series6.setName("Угол отклонения спутника");
         series7 = new XYChart.Series();
-        series7.setName("Угловая ошиб скорость спутника");
+        series7.setName("Угловая скорость спутника");
         series8 = new XYChart.Series();
-        series8.setName("Норм угол");
+        series8.setName("Угол эйлера");
         series9 = new XYChart.Series();
-        series9.setName("Норм угл скорости");
+        series9.setName("Угл скорость эйлера");
         for (int i = (int) minX; i < maxX; ++i) {
             series2.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), yx_plot.get(i)));
-            series3.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), rx_plot.get(i)));
+            series3.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), ex_plot.get(i)));
             series4.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), ydx_plot.get(i)));
-            series5.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), rdx_plot.get(i)));
-            series6.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), yxm_plot.get(i)));
-            series7.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), ydxm_plot.get(i)));
+            series5.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), edx_plot.get(i)));
+            series6.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), rx_plot.get(i)));
+            series7.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), rdx_plot.get(i)));
             series8.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), ex_plot.get(i)));
             series9.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), edx_plot.get(i)));
         }
         chart_razgon.getData().clear();
-        chart_razgon.getData().addAll(series2, series3, series4, series5, series6, series7, series8, series9);
+        chart_razgon.getData().addAll(series2, series3, series4, series5, series6, series7);
 
         chart_razgon.setHorizontalGridLinesVisible(false);
         chart_razgon.setVerticalGridLinesVisible(false);
