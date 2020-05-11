@@ -294,7 +294,7 @@ public class MainController implements Initializable {
         countDupStick = 0;
         countDusStick = 0;
         while (am.getW() > 0 && t <= 1500 && Math.abs(am.getDx()) < 1.5) { // # пока скорость маховика > 0
-
+            am.setT(t);
             errorFilteringUnit();
 
             ex = x_next;// сохраняем значение угла, вычисленного методомЭйлера
@@ -325,24 +325,14 @@ public class MainController implements Initializable {
         x_plot.add(i); // добавили значение для OX
         yv_plot.add(am.getV()); // добавили значение для линейнойскорости маховика
 
-        if (p_err) {
-            yx_plot.add(am.getDup());
-            ydx_plot.add(am.getNormalDx());
-        } else if (s_err) {
-            yx_plot.add(am.getNormalX());
-            ydx_plot.add(am.getDus());
-        } else {
-            yx_plot.add(am.getDup());
-            ydx_plot.add(am.getDus());
-        }
-
-
         yxm_plot.add(xm);
         ydxm_plot.add(dxm);
 
         if (!isFilterEnabled.isSelected()) {
             rx_plot.add(am.getDisXbc());
             rdx_plot.add(am.getDisDXbc());
+            yx_plot.add(am.getDup());
+            ydx_plot.add(am.getDus());
         } else {
             if (dupStick && countDupStick < 3) {
                 rx_plot.add(am.getDisXbc());
@@ -354,6 +344,18 @@ public class MainController implements Initializable {
             } else {
                 rdx_plot.add(am.getDiscreteDx());
             }
+            if (p_err) {
+                yx_plot.add(am.getDup());
+                ydx_plot.add(am.getNormalDx());
+            } else if (s_err) {
+                yx_plot.add(am.getNormalX());
+                ydx_plot.add(am.getDus());
+            } else {
+//                yx_plot.add(am.getDup());
+//                ydx_plot.add(am.getDus());
+                yx_plot.add(am.getNormalX());
+                ydx_plot.add(am.getNormalDx());
+            }
         }
 
         ex_plot.add(ex); // добавили значение угла, рассчитанное по Эйлеру
@@ -361,6 +363,8 @@ public class MainController implements Initializable {
     }
 
     public void brackingImpactUnit(double curX, double curDx) {
+        am.brakingFlywheel(satellite); // производим торможение маховика
+
         if (!p_err && p_err_t >= 0 && p_err_t <= 1500 && t >= p_err_t) { // если нет ошибки ДУП и пришло время ошибки
             p_err = true; //ошибка ДУП
             if (!isSetDUPStickValue && selectedError().equals("dupStick")) {
@@ -402,7 +406,7 @@ public class MainController implements Initializable {
             am.rRotationSatelliteOnBracking(satellite, false);
         }
 
-        am.brakingFlywheel(satellite); // производим торможение маховика
+//        am.brakingFlywheel(satellite); // производим торможение маховика
         if (isFilterEnabled.isSelected()) {
             if (countDupStick < 3 && countDusStick < 3)
                 am.rBrakingFlywheel(satellite, false);
@@ -415,6 +419,7 @@ public class MainController implements Initializable {
     }
 
     public void accelerationImpactUnit(double curX) {
+        am.accelerationFlywheel(satellite); // производим ускорение маховика
         if (!p_err && p_err_t >= 0 && p_err_t <= 1500 && t >= p_err_t) {
             p_err = true;
             if (!isSetDUPStickValue && selectedError().equals("dupStick")) {
@@ -446,7 +451,7 @@ public class MainController implements Initializable {
             am.rRotationSatelliteOnAcceleration(satellite, false); // производим вращение спутника
         }
 
-        am.accelerationFlywheel(satellite); // производим ускорение маховика
+//        am.accelerationFlywheel(satellite); // производим ускорение маховика
 
         if (isFilterEnabled.isSelected()) {
             if (countDupStick < 3 && countDusStick < 3)

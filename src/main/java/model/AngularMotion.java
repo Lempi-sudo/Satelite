@@ -11,6 +11,7 @@ public class AngularMotion {
     private double dw;
     private double M_f;
     private double dt = 1;
+    private double T= 3;
     private double fi;
     private double f;
 
@@ -50,6 +51,7 @@ public class AngularMotion {
     private double p_err_t = 0;
     private double s_err_t = 0;
     boolean flag = false;
+    private boolean flag2 = false;
 
     public double getDus() {
         setErrorValue(false);
@@ -218,6 +220,7 @@ public class AngularMotion {
         this.x += this.dx * dt; // по "жёлтой" формуле X1(n+1)
         this.dx += dt * (satellite.getM_p_() + satellite.getM_b_() - satellite.getM_rc_() * f);
     }
+
     //--------------------------------------------------------------------------------------------
 
     public void setDus(double dus) {
@@ -320,24 +323,21 @@ public class AngularMotion {
         if (dup) {
             if (dupFailure) this.dup = (1 - (Math.random() / 10000 + 0.9999));
             if (dupStick) this.dup = dupStickValue;
-            if (t == p_err_t) {
-                this.dup = rx * 3;
-                flag = true;
-            }
-            if (t > p_err_t && flag) this.dup = x;
+//            if (t == p_err_t) {
+//                this.dup = rx * 3;
+//                flag = true;
+//            }
+//            if (t > p_err_t && flag) this.dup = x;
 
         }
         else {
             if (dusFailure) this.dus = (1 - (Math.random() / 10000 + 0.9999));
             else if (dusStick) this.dus = dusStickValue;
-            else if (isSetDusPomeh) {
-                this.dus = dx;
-                isSetDusPomeh = false;
-            } else if (dusPomeh) {
-                dusPomeh = false;
-                this.dus = prevRDx * (Math.random() + 3);
-                isSetDusPomeh = true;
-            }
+//            if (t == s_err_t) {
+//                this.dus = rdx * 3;
+//                flag2 = true;
+//            }
+//            if (t > s_err_t && flag2) this.dus = dx;
         }
     }
 
@@ -360,25 +360,27 @@ public class AngularMotion {
     }
 
     public double getX() {
-        if (dupFailure) return (1 - (Math.random()/10000 + 0.9999));
-        else if (dupStick) return dupStickValue;
-        else if (dupPomeh) {
-            dupPomeh = false;
-            return prevX*(Math.random() + 1.3);
-        }
-        else return this.x;
+////        if (dupFailure) return (1 - (Math.random()/10000 + 0.9999));
+////        else if (dupStick) return dupStickValue;
+////        else if (dupPomeh) {
+////            dupPomeh = false;
+////            return prevX*(Math.random() + 1.3);
+////        }
+//        else
+            return this.x;
     }
 
 
 
     public double getDx() {
-        if (dusFailure) return (1 - (Math.random()/10000 + 0.9999));
-        else if (dusStick) return dusStickValue;
-        else if (dusPomeh) {
-            dusPomeh = false;
-            return prevDx*(Math.random() + 3);
-        }
-        else return this.dx;
+//        if (dusFailure) return (1 - (Math.random()/10000 + 0.9999));
+//        else if (dusStick) return dusStickValue;
+//        else if (dusPomeh) {
+//            dusPomeh = false;
+//            return prevDx*(Math.random() + 3);
+//        }
+//        else
+            return this.dx;
     }
 
     public double getNormalX() {
