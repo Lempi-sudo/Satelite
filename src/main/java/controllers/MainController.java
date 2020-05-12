@@ -8,26 +8,12 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import model.AngularMotion;
-import model.DUP;
-import model.DUS;
+import model.Errors.*;
 import model.Satellite;
-import org.apache.log4j.Logger;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import sun.rmi.runtime.Log;
 
 import java.io.*;
 import java.net.URL;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
@@ -73,8 +59,8 @@ public class MainController implements Initializable {
 
     private ArrayList<Double> M_f_plot = new ArrayList<>();
     private Satellite satellite;
-    private DUP dup;
-    private DUS dus;
+    private SensorError sensors;
+
     private ArrayList<Double> x_plot = new ArrayList<>(); // значения для OX
     private ArrayList<Double> yv_plot = new ArrayList<>(); // значения для линейной скорости
     private ArrayList<Double> yx_plot = new ArrayList<>(); // значения угла
@@ -97,7 +83,7 @@ public class MainController implements Initializable {
     private double s_err_value = 0; //значения ошибки
     private double ex = 0; // угол вычисленный по методу Эйлера
     private double edx = 0; // угловая скорость вычисленная по методу Эйлера
-    private double i = 0; // счётчик
+    private int i = 0; // счётчик
     private double t = 0; // время
     private double dt = 1;
     private double x_next;
@@ -135,6 +121,7 @@ public class MainController implements Initializable {
     double curDx = 0;
     double countDupPom = 0;
     double countDusPom = 0;
+    int pickUpCount = 0;
 
     public void setStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
@@ -215,63 +202,24 @@ public class MainController implements Initializable {
 //        chartsController.setGraphsData(x_plot, yv_plot, yx_plot, ydx_plot, yxm_plot, ydxm_plot, 0, x_plot.size(), ex_plot, edx_plot);
     }
 
-    //returned type of the error from DUP
-    private String errorDetectionModuleDUP(double elX, double curX, double curDx, double t) {
-        if (t > 0) {
-            if (dupFailure) {
-//            if (Math.abs(curX) < 0.0001 && Math.abs(elX - curX) > 0.01 && curDx > 0.01){
-//                System.out.println("dupFailure");
-                return "dupFailure";
-            }
-            if(dupStick) {
-//            if (Math.abs(elX - curX) < 0.0001 && curDx > 0.01){
-//                System.out.println("dupStick");
-                return "dupStick";
-            }
-            if (dupPomeh) {
-//            if (Math.abs(elX - curX) > 0.02 && curDx < 0.001){
-//                System.out.println("dupPomeh");
-                return "dupPomeh";
-            }
-        }
-        return "";
-    }
 
-    //returned type of the error from DUS
-    private String errorDetectionModuleDUS(double elDx, double curDx, double prevX, double curX,  double t) {
-        if (t > 0) {
-//            if (Math.abs(curDx) < 0.00001 && Math.abs(prevX - curX) > 0.01) {
-            if (dusFailure) {
-//                System.out.println("dusFailure");
-                return "dusFailure";
-            }
-//            if (Math.abs(prevDx - curDx) < 0.0001 && (Math.abs(prevX - curX) - deltaX) < 0.001) {
-            if (dusStick) {
-//                System.out.println("dusStick: " + t);
-                deltaX = Math.abs(prevX-curX);
-                return "dusStick";
-            }
-//            if (Math.abs(prevDx - curDx) > 0.2 ) {
-            if (dusPomeh) {
-//                System.out.println("dusPomeh");
-                return "dusPomeh";
-            }
-        }
-        return "";
-    }
 
     private void calculate() {
         characteristicsIsChanged = false;
         clearAllValues();
         saveNeshtatAction(new ActionEvent());
-
+        am.setTdis(T);
+        chartsController.setT(T);
+        saveSelectedError();
+        am.setSensors(sensors);
+        am.setFilterIsEnabled(isFilterEnabled.isSelected());
         while (am.getW() * satellite.getJ_m() < satellite.getH_max() && t <= 4000 && Math.abs(am.getDx()) < 1.5) {
             am.setT(t);
-            errorFilteringUnit();
-
-
-            ex = x_next;  // сохраняем значение угла, вычисленного методом Эйлера
-            edx = dx_next; // сохраняем значение угловой скорости, вычисленной по методу Эйлера
+//            errorFilteringUnit();
+                curX = am.getX();
+                curDx = am.getDx();
+//            ex = x_next;  // сохраняем значение угла, вычисленного методом Эйлера
+//            edx = dx_next; // сохраняем значение угловой скорости, вычисленной по методу Эйлера
 //            ex = am.getNormalX();
 //            edx = am.getNormalDx();
             if (t == check_T) { // если пришло время съёма значений
@@ -282,23 +230,23 @@ public class MainController implements Initializable {
             recordingValuesUnit(curX, curDx);
 
             accelerationImpactUnit(curX);
-            if (t >= 73 && t < 77) {
-                M_f_plot.add(am.getrM_f());
-            }
+//            if (t >= 73 && t < 77) {
+//                M_f_plot.add(am.getrM_f());
+//            }
             t += dt; // следующий шаг времени
             i += 1; // следующий цикл
-            if (t == p_err_t) {
-                System.out.println("as");
-            }
+//            if (t == p_err_t) {
+//                System.out.println("as");
+//            }
         }
         countDupStick = 0;
         countDusStick = 0;
         while (am.getW() > 0 && t <= 1500 && Math.abs(am.getDx()) < 1.5) { // # пока скорость маховика > 0
             am.setT(t);
-            errorFilteringUnit();
+//            errorFilteringUnit();
 
-            ex = x_next;// сохраняем значение угла, вычисленного методомЭйлера
-            edx = dx_next;// сохраняем значение угловой скорости,вычисленной по методу Эйлера
+//            ex = x_next;// сохраняем значение угла, вычисленного методомЭйлера
+//            edx = dx_next;// сохраняем значение угловой скорости,вычисленной по методу Эйлера
 //            ex = am.getNormalX();
 //            edx = am.getNormalDx();
             if (t == check_T) { // если пришло время съёма значений
@@ -312,52 +260,53 @@ public class MainController implements Initializable {
 
             t += dt; // следующий шаг времени
             i += 1; // следующий цикл
-            if (t == p_err_t) {
-                System.out.println("as");
-            }
+//            if (t == p_err_t) {
+//                System.out.println("as");
+//            }
         }
-        for (int i = 0; i < M_f_plot.size(); i++) {
-            System.out.println(M_f_plot.get(i));
-        }
+//        for (int i = 0; i < M_f_plot.size(); i++) {
+//            System.out.println(M_f_plot.get(i));
+//        }
     }
 
     public void recordingValuesUnit(double curX, double curDx) {
-        x_plot.add(i); // добавили значение для OX
+        x_plot.add( (double) i); // добавили значение для OX
         yv_plot.add(am.getV()); // добавили значение для линейнойскорости маховика
 
-        yxm_plot.add(xm);
-        ydxm_plot.add(dxm);
+        yxm_plot.add(am.getDiscreteX());
+        ydxm_plot.add(am.getDiscreteDx());
 
-        if (!isFilterEnabled.isSelected()) {
-            rx_plot.add(am.getDisXbc());
-            rdx_plot.add(am.getDisDXbc());
-            yx_plot.add(am.getDup());
-            ydx_plot.add(am.getDus());
-        } else {
-            if (dupStick && countDupStick < 3) {
-                rx_plot.add(am.getDisXbc());
-            } else {
-                rx_plot.add(am.getDiscreteX());
-            }
-            if (dusStick && countDusStick < 3) {
-                rdx_plot.add(am.getDisDXbc());
-            } else {
-                rdx_plot.add(am.getDiscreteDx());
-            }
-            if (p_err) {
-                yx_plot.add(am.getDup());
-                ydx_plot.add(am.getNormalDx());
-            } else if (s_err) {
-                yx_plot.add(am.getNormalX());
-                ydx_plot.add(am.getDus());
-            } else {
+//        if (!isFilterEnabled.isSelected()) {
+//            rx_plot.add(am.getDisXbc());
+//            rdx_plot.add(am.getDisDXbc());
+//            yx_plot.add(am.getDup());
+//            ydx_plot.add(am.getDus());
+//        } else {
+//            if (dupStick && countDupStick < 3) {
+//                rx_plot.add(am.getDisXbc());
+//            } else {
+//                rx_plot.add(am.getDiscreteX());
+//            }
+//            if (dusStick && countDusStick < 3) {
+//                rdx_plot.add(am.getDisDXbc());
+//            } else {
+//                rdx_plot.add(am.getDiscreteDx());
+//            }
+//            if (p_err) {
+//                yx_plot.add(am.getNormalX());
+//                ydx_plot.add(am.getNormalDx());
+//            } else if (s_err) {
+//                yx_plot.add(am.getNormalX());
+//                ydx_plot.add(am.getNormalDx());
+//            } else {
 //                yx_plot.add(am.getDup());
 //                ydx_plot.add(am.getDus());
                 yx_plot.add(am.getNormalX());
                 ydx_plot.add(am.getNormalDx());
-            }
-        }
-
+//            }
+//        }
+//        yx_plot.add(am.getNormalX());
+//        ydx_plot.add(am.getNormalDx());
         ex_plot.add(ex); // добавили значение угла, рассчитанное по Эйлеру
         edx_plot.add(edx); // добавили значение угл. скорости, рассчитанное по Эйлеру
     }
@@ -367,11 +316,11 @@ public class MainController implements Initializable {
 
         if (!p_err && p_err_t >= 0 && p_err_t <= 1500 && t >= p_err_t) { // если нет ошибки ДУП и пришло время ошибки
             p_err = true; //ошибка ДУП
-            if (!isSetDUPStickValue && selectedError().equals("dupStick")) {
-                saveDUPStickValue(curX);
-                isSetDUPStickValue = true;
-            }
-            am.setError(selectedError(), dupStickValue);
+//            if (!isSetDUPStickValue && saveSelectedError().equals("dupStick")) {
+//                saveDUPStickValue(curX);
+//                isSetDUPStickValue = true;
+//            }
+//            am.setError(saveSelectedError(), dupStickValue);
             am.rotationSatelliteOnBracking(satellite);
 
             if (isFilterEnabled.isSelected()) {
@@ -385,11 +334,11 @@ public class MainController implements Initializable {
 
         } else if (!s_err && s_err_t >= 0 && s_err_t <= 4000 && t >= s_err_t) { // если нет ошибки ДУС и пришло время ошибки
             s_err = true; // ошибка ДУС
-            if (!isSetDUSStickValue && selectedError().equals("dusStick")) {
-                saveDUSStickValue(curDx);
-                isSetDUSStickValue = true;
-            }
-            am.setError(selectedError(), dusStickValue);
+//            if (!isSetDUSStickValue && saveSelectedError().equals("dusStick")) {
+//                saveDUSStickValue(curDx);
+//                isSetDUSStickValue = true;
+//            }
+//            am.setError(saveSelectedError(), dusStickValue);
             am.rotationSatelliteOnBracking(satellite);
 
             if (isFilterEnabled.isSelected()) {
@@ -422,11 +371,11 @@ public class MainController implements Initializable {
         am.accelerationFlywheel(satellite); // производим ускорение маховика
         if (!p_err && p_err_t >= 0 && p_err_t <= 1500 && t >= p_err_t) {
             p_err = true;
-            if (!isSetDUPStickValue && selectedError().equals("dupStick")) {
-                dupStickValue = curX;
-                isSetDUPStickValue = true;
-            }
-            am.setError(selectedError(), dupStickValue);
+//            if (!isSetDUPStickValue && saveSelectedError().equals("dupStick")) {
+//                dupStickValue = curX;
+//                isSetDUPStickValue = true;
+//            }
+//            am.setError(saveSelectedError(), dupStickValue);
             am.rotationSatelliteOnAcceleration(satellite); // производим вращение спутника
             if (!isFilterEnabled.isSelected()) {
                 am.rRotationSatelliteOnAcceleration(satellite, false);
@@ -435,11 +384,11 @@ public class MainController implements Initializable {
             else am.rRotationSatelliteOnAcceleration(satellite, true);
         } else if (!s_err && s_err_t >= 0 && s_err_t <= 1500 && t >= s_err_t) { //если нет ошибки ДУС и пришло время ошибки
             s_err = true;
-            if (!isSetDUSStickValue && selectedError().equals("dusStick")) {
-                isSetDUSStickValue = true;
-                dusStickValue = am.getDx();
-            }
-            am.setError(selectedError(), dusStickValue);
+//            if (!isSetDUSStickValue && saveSelectedError().equals("dusStick")) {
+//                isSetDUSStickValue = true;
+//                dusStickValue = am.getDx();
+//            }
+//            am.setError(saveSelectedError(), dusStickValue);
             am.rotationSatelliteOnAcceleration(satellite); // производим вращение спутника
             if (!isFilterEnabled.isSelected()) {
                 am.rRotationSatelliteOnAcceleration(satellite, false);
@@ -464,117 +413,126 @@ public class MainController implements Initializable {
 
     }
 
-    public void errorFilteringUnit() {
-        curX = am.getNormalX();
-        curDx = am.getNormalDx();
-        String errorType = errorDetectionModuleDUP(am.getPrevX(), curX, curDx, t);
-//        if (!errorType.equals("")) {
-            switch (errorType) {
-                case "dupFailure": {
-                    x_next = ex + dt * edx;
-                    break;
-                }
-                case "dupStick": {
-                    x_next = ex + dt * edx;
-//                        if (countTDUPError <= 2) {
-//                    x_next = curX;
-//                        } else {
-//                            x_next = ex + dt * edx;
-//                        }
-                    p_err_value = curX;
-                    break;
-                }
-                case "dupPomeh": {
-//                    x_next = am.getPrevX();
-                    x_next = ex + dt * edx;
-                    break;
-                }
-                default: {
-                        x_next = curX;
-                    break;
-                }
-            }
-//        } else {
-            errorType = errorDetectionModuleDUS(am.getPrevDx(), curDx, am.getPrevX(), curX, t);
-//            if (!errorType.equals("")) {
-                switch (errorType) {
-                    case "dusFailure": {
-                        dx_next = (x_next - ex) / dt;
-                        break;
-                    }
-                    case "dusStick": {
-//                            if (countTDUSError <= 2) {
-//                        dx_next = curDx;
-//                            } else {
-                                dx_next = (x_next - ex) / dt;
-//                            }
-                        s_err_value = curDx;
-                        break;
-                    }
-                    case "dusPomeh": {
-//                        dx_next = am.getPrevDx();
-                        dx_next = (x_next - ex) / dt;
-
-                        break;
-                    }
-                    default: {
-                            dx_next = curDx;
-                        break;
-                    }
-                }
+//    public void errorFilteringUnit() {
+//        curX = am.getNormalX();
+//        curDx = am.getNormalDx();
+//        String errorType = errorDetectionModuleDUP(am.getPrevX(), curX, curDx, t);
+////        if (!errorType.equals("")) {
+//            switch (errorType) {
+//                case "dupFailure": {
+//                    x_next = ex + dt * edx;
+//                    break;
+//                }
+//                case "dupStick": {
+//                    x_next = ex + dt * edx;
+////                        if (countTDUPError <= 2) {
+////                    x_next = curX;
+////                        } else {
+////                            x_next = ex + dt * edx;
+////                        }
+//                    p_err_value = curX;
+//                    break;
+//                }
+//                case "dupPomeh": {
+////                    x_next = am.getPrevX();
+//                    x_next = ex + dt * edx;
+//                    break;
+//                }
+//                default: {
+//                        x_next = curX;
+//                    break;
+//                }
 //            }
-//            else {
-//                x_next = curX;
-//                dx_next = curDx;
-//            }
-//        }
-    }
+////        } else {
+//            errorType = errorDetectionModuleDUS(am.getPrevDx(), curDx, am.getPrevX(), curX, t);
+////            if (!errorType.equals("")) {
+//                switch (errorType) {
+//                    case "dusFailure": {
+//                        dx_next = (x_next - ex) / dt;
+//                        break;
+//                    }
+//                    case "dusStick": {
+////                            if (countTDUSError <= 2) {
+////                        dx_next = curDx;
+////                            } else {
+//                                dx_next = (x_next - ex) / dt;
+////                            }
+//                        s_err_value = curDx;
+//                        break;
+//                    }
+//                    case "dusPomeh": {
+////                        dx_next = am.getPrevDx();
+//                        dx_next = (x_next - ex) / dt;
+//
+//                        break;
+//                    }
+//                    default: {
+//                            dx_next = curDx;
+//                        break;
+//                    }
+//                }
+////            }
+////            else {
+////                x_next = curX;
+////                dx_next = curDx;
+////            }
+////        }
+//    }
 
     public void valuePickupUnit(double curX, double curDx) {
-        if (!p_err && !s_err) { //сохраняем угол с датчика, если нет ошибки, иначе берём "Эйлеровский"
-//                    prevXm = xm;
-            xm = curX;
-        } else {
-            if (!isFilterEnabled.isSelected()) {
-                xm = am.getRx();
-            } else {
-                if (dupStick && countDupStick < 3) {
-                    countDupStick++;
-//                        xm = prevXm;
-                } else if (dupStick && countDupStick == 3) {
-//                        prevXm = xm;
-                    xm = am.getNormalX();
-                } else {
-//                        prevXm = xm;
-                    xm = am.getNormalX();
-                }
-            }
-        }
-        if (!s_err && !p_err) { //сохраняем угловую скорость с датчика, если нет ошибки, иначе берем"Эйлеровскую"
-//                    prevDxm = dxm;
-            dxm = curDx;
-        } else {
-            if (!isFilterEnabled.isSelected()) {
-                dxm = am.getRdx();
-            } else {
-                if (dusStick && countDusStick < 3) {
-                    countDusStick++;
-//                        dxm = prevDxm;
-                } else if (dusStick && countDusStick == 3) {
-//                        prevDxm = dxm;
-                    dxm = am.getNormalDx();
-                } else {
-//                        prevDxm = dxm;
-                    dxm = am.getNormalDx();
-                }
-            }
-        }
+
+//        if (!p_err && !s_err) { //сохраняем угол с датчика, если нет ошибки, иначе берём "Эйлеровский"
+////                    prevXm = xm;
+//            xm = curX;
+//        } else {
+//            if (!isFilterEnabled.isSelected()) {
+//                xm = am.getRx();
+//            } else {
+//                if (dupStick && countDupStick < 3) {
+//                    countDupStick++;
+////                        xm = prevXm;
+//                } else if (dupStick && countDupStick == 3) {
+////                        prevXm = xm;
+//                    xm = am.getNormalX();
+//                } else {
+////                        prevXm = xm;
+//                    xm = am.getNormalX();
+//                }
+//            }
+//        }
+//        if (!s_err && !p_err) { //сохраняем угловую скорость с датчика, если нет ошибки, иначе берем"Эйлеровскую"
+////                    prevDxm = dxm;
+//            dxm = curDx;
+//        } else {
+//            if (!isFilterEnabled.isSelected()) {
+//                dxm = am.getRdx();
+//            } else {
+//                if (dusStick && countDusStick < 3) {
+//                    countDusStick++;
+////                        dxm = prevDxm;
+//                } else if (dusStick && countDusStick == 3) {
+////                        prevDxm = dxm;
+//                    dxm = am.getNormalDx();
+//                } else {
+////                        prevDxm = dxm;
+//                    dxm = am.getNormalDx();
+//                }
+//            }
+//        }
+
         am.setDiscreteRx();
         am.setDiscreteRdx();
         am.setDiscreteX();
         am.setDiscreteDx();
-        am.setDisXbc();
-        am.setDisDXbc();
+        am.doDiffDup();
+        am.doIntDus();
+        if (isFilterEnabled.isSelected()) {
+            am.errorFilteringUnit();
+        }
+//        am.doDiffDup();
+//        am.doIntDus();
+
+
     }
 
 
@@ -673,25 +631,28 @@ public class MainController implements Initializable {
     }
 
     private void showGraph(double minX, double maxX, boolean cmpEr) throws IOException {
-        System.out.println("wtf: dup = " + dupFailure + ";");
+        System.out.println("wtf: dupFailure = " + dupFailure + ";");
         if (chartsStage.getOwner() == null) {
             chartsStage.initOwner(primaryStage);
         }
         if (!cmpEr)
-            chartsController.setGraphsData(x_plot, yv_plot, yx_plot, ydx_plot, yxm_plot, ydxm_plot, minX, maxX, ex_plot, edx_plot, rx_plot, rdx_plot);
+            chartsController.setGraphsData(x_plot, yv_plot, yx_plot, ydx_plot, yxm_plot, ydxm_plot, minX, maxX, am.getDiffDup(), am.getIntDus(), rx_plot, rdx_plot);
         else
-            chartsController.setCompareErData(minX, maxX, x_plot, yx_plot, rx_plot, ydx_plot, rdx_plot, yxm_plot, ydxm_plot, ex_plot, edx_plot);
+            chartsController.setCompareErData(minX, maxX, x_plot, yx_plot, rx_plot, ydx_plot, rdx_plot, yxm_plot, ydxm_plot, am.getDiffDup(), am.getIntDus());
         chartsController.start();
     }
 
-    private String selectedError() {
-        if (rb_DUS_Failure.isSelected()) return "dusFailure";
-        else if (rb_DUS_sticking.isSelected()) return "dusStick";
-        else if (rb_DUS_pomeh.isSelected()) return "dusPomeh";
-        if (rb_DUP_Failure.isSelected()) return "dupFailure";
-        else if (rb_DUP_sticking.isSelected()) return "dupStick";
-        else if (rb_DUP_pomeh.isSelected()) return "dupPomeh";
-        return "no";
+    private void saveSelectedError() {
+        p_err_t = Double.valueOf(tf_DUP_time.getText());
+        s_err_t = Double.valueOf(tf_DUS_time.getText());
+        if (p_err_t > 0 || s_err_t > 0) {
+            if (rb_DUS_Failure.isSelected()) sensors = new DusFailure(am, p_err_t);
+            else if (rb_DUS_sticking.isSelected()) sensors = new DusStick(am, p_err_t);
+            else if (rb_DUS_pomeh.isSelected()) sensors = new DusPomeh(am, p_err_t);
+            else if (rb_DUP_Failure.isSelected()) sensors = new DupFailure(am, p_err_t);
+            else if (rb_DUP_sticking.isSelected()) sensors = new DupStick(am, p_err_t);
+            else if (rb_DUP_pomeh.isSelected()) sensors = new DupPomeh(am, p_err_t);
+        } else sensors = new NormalSensor(am);
     }
 
     public void showActionGraph(ActionEvent actionEvent) {
