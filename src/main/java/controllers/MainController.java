@@ -2,6 +2,7 @@ package controllers;
 
 import FXUtils.Loader;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
@@ -207,321 +208,66 @@ public class MainController implements Initializable {
     private void calculate() {
         characteristicsIsChanged = false;
         clearAllValues();
-        saveNeshtatAction(new ActionEvent());
         am.setTdis(T);
         chartsController.setT(T);
-        saveSelectedError();
+        saveSelectedError(new ActionEvent());
         am.setSensors(sensors);
         am.setFilterIsEnabled(isFilterEnabled.isSelected());
-        while (am.getW() * satellite.getJ_m() < satellite.getH_max() && t <= 4000 && Math.abs(am.getDx()) < 1.5) {
+        while (am.getW() * satellite.getJ_m() < satellite.getH_max() && t <= 1350) {
             am.setT(t);
-//            errorFilteringUnit();
                 curX = am.getX();
                 curDx = am.getDx();
-//            ex = x_next;  // сохраняем значение угла, вычисленного методом Эйлера
-//            edx = dx_next; // сохраняем значение угловой скорости, вычисленной по методу Эйлера
-//            ex = am.getNormalX();
-//            edx = am.getNormalDx();
+
             if (t == check_T) { // если пришло время съёма значений
-                valuePickupUnit(curX, curDx);
+                valuePickupUnit();
                 check_T += T; // задаем следующее время съёма значений
             }
 
-            recordingValuesUnit(curX, curDx);
+            recordingValuesUnit();
 
-            accelerationImpactUnit(curX);
-//            if (t >= 73 && t < 77) {
-//                M_f_plot.add(am.getrM_f());
-//            }
+            am.accelerationFlywheel(satellite); // производим ускорение маховика
+            am.rotationSatelliteOnAcceleration(satellite); // производим вращение спутника
+
             t += dt; // следующий шаг времени
             i += 1; // следующий цикл
-//            if (t == p_err_t) {
-//                System.out.println("as");
-//            }
+
         }
         countDupStick = 0;
         countDusStick = 0;
-        while (am.getW() > 0 && t <= 1500 && Math.abs(am.getDx()) < 1.5) { // # пока скорость маховика > 0
+        while (am.getW() > 0 && t <= 1350) { // # пока скорость маховика > 0
             am.setT(t);
-//            errorFilteringUnit();
-
-//            ex = x_next;// сохраняем значение угла, вычисленного методомЭйлера
-//            edx = dx_next;// сохраняем значение угловой скорости,вычисленной по методу Эйлера
-//            ex = am.getNormalX();
-//            edx = am.getNormalDx();
             if (t == check_T) { // если пришло время съёма значений
-                valuePickupUnit(curX, curDx);
+                valuePickupUnit();
                 check_T += T; //задаем следующее время съёма значений
             }
 
-            recordingValuesUnit(curX, curDx);
+            recordingValuesUnit();
 
-            brackingImpactUnit(curX, curDx);
+            am.brakingFlywheel(satellite); // производим торможение маховика
+            am.rotationSatelliteOnBracking(satellite);
 
             t += dt; // следующий шаг времени
             i += 1; // следующий цикл
-//            if (t == p_err_t) {
-//                System.out.println("as");
-//            }
+
         }
-//        for (int i = 0; i < M_f_plot.size(); i++) {
-//            System.out.println(M_f_plot.get(i));
-//        }
+
     }
 
-    public void recordingValuesUnit(double curX, double curDx) {
+    public void recordingValuesUnit() {
         x_plot.add( (double) i); // добавили значение для OX
         yv_plot.add(am.getV()); // добавили значение для линейнойскорости маховика
 
-        yxm_plot.add(am.getDiscreteX());
-        ydxm_plot.add(am.getDiscreteDx());
+        yxm_plot.add(am.getDupValue());
+        ydxm_plot.add(am.getDusValue());
 
-//        if (!isFilterEnabled.isSelected()) {
-//            rx_plot.add(am.getDisXbc());
-//            rdx_plot.add(am.getDisDXbc());
-//            yx_plot.add(am.getDup());
-//            ydx_plot.add(am.getDus());
-//        } else {
-//            if (dupStick && countDupStick < 3) {
-//                rx_plot.add(am.getDisXbc());
-//            } else {
-//                rx_plot.add(am.getDiscreteX());
-//            }
-//            if (dusStick && countDusStick < 3) {
-//                rdx_plot.add(am.getDisDXbc());
-//            } else {
-//                rdx_plot.add(am.getDiscreteDx());
-//            }
-//            if (p_err) {
-//                yx_plot.add(am.getNormalX());
-//                ydx_plot.add(am.getNormalDx());
-//            } else if (s_err) {
-//                yx_plot.add(am.getNormalX());
-//                ydx_plot.add(am.getNormalDx());
-//            } else {
-//                yx_plot.add(am.getDup());
-//                ydx_plot.add(am.getDus());
-                yx_plot.add(am.getNormalX());
-                ydx_plot.add(am.getNormalDx());
-//            }
-//        }
-//        yx_plot.add(am.getNormalX());
-//        ydx_plot.add(am.getNormalDx());
+        yx_plot.add(am.getNormalX());
+        ydx_plot.add(am.getNormalDx());
         ex_plot.add(ex); // добавили значение угла, рассчитанное по Эйлеру
         edx_plot.add(edx); // добавили значение угл. скорости, рассчитанное по Эйлеру
     }
 
-    public void brackingImpactUnit(double curX, double curDx) {
-        am.brakingFlywheel(satellite); // производим торможение маховика
 
-        if (!p_err && p_err_t >= 0 && p_err_t <= 1500 && t >= p_err_t) { // если нет ошибки ДУП и пришло время ошибки
-            p_err = true; //ошибка ДУП
-//            if (!isSetDUPStickValue && saveSelectedError().equals("dupStick")) {
-//                saveDUPStickValue(curX);
-//                isSetDUPStickValue = true;
-//            }
-//            am.setError(saveSelectedError(), dupStickValue);
-            am.rotationSatelliteOnBracking(satellite);
-
-            if (isFilterEnabled.isSelected()) {
-                if (countDupStick < 3)
-                    am.rRotationSatelliteOnBracking(satellite, false);
-                else
-                    am.rRotationSatelliteOnBracking(satellite, true);
-            } else {
-                am.rRotationSatelliteOnBracking(satellite, false);
-            }
-
-        } else if (!s_err && s_err_t >= 0 && s_err_t <= 4000 && t >= s_err_t) { // если нет ошибки ДУС и пришло время ошибки
-            s_err = true; // ошибка ДУС
-//            if (!isSetDUSStickValue && saveSelectedError().equals("dusStick")) {
-//                saveDUSStickValue(curDx);
-//                isSetDUSStickValue = true;
-//            }
-//            am.setError(saveSelectedError(), dusStickValue);
-            am.rotationSatelliteOnBracking(satellite);
-
-            if (isFilterEnabled.isSelected()) {
-                if (countDupStick < 3)
-                    am.rRotationSatelliteOnBracking(satellite, false);
-                else
-                    am.rRotationSatelliteOnBracking(satellite, true);
-            } else {
-                am.rRotationSatelliteOnBracking(satellite, false);
-            }
-
-        } else {
-            am.rotationSatelliteOnBracking(satellite);
-            am.rRotationSatelliteOnBracking(satellite, false);
-        }
-
-//        am.brakingFlywheel(satellite); // производим торможение маховика
-        if (isFilterEnabled.isSelected()) {
-            if (countDupStick < 3 && countDusStick < 3)
-                am.rBrakingFlywheel(satellite, false);
-            else
-                am.rBrakingFlywheel(satellite, true);
-        } else {
-            am.rBrakingFlywheel(satellite, false);
-        }
-
-    }
-
-    public void accelerationImpactUnit(double curX) {
-        am.accelerationFlywheel(satellite); // производим ускорение маховика
-        if (!p_err && p_err_t >= 0 && p_err_t <= 1500 && t >= p_err_t) {
-            p_err = true;
-//            if (!isSetDUPStickValue && saveSelectedError().equals("dupStick")) {
-//                dupStickValue = curX;
-//                isSetDUPStickValue = true;
-//            }
-//            am.setError(saveSelectedError(), dupStickValue);
-            am.rotationSatelliteOnAcceleration(satellite); // производим вращение спутника
-            if (!isFilterEnabled.isSelected()) {
-                am.rRotationSatelliteOnAcceleration(satellite, false);
-            } else if (countDupStick < 3)
-                am.rRotationSatelliteOnAcceleration(satellite, false); // производим вращение спутника
-            else am.rRotationSatelliteOnAcceleration(satellite, true);
-        } else if (!s_err && s_err_t >= 0 && s_err_t <= 1500 && t >= s_err_t) { //если нет ошибки ДУС и пришло время ошибки
-            s_err = true;
-//            if (!isSetDUSStickValue && saveSelectedError().equals("dusStick")) {
-//                isSetDUSStickValue = true;
-//                dusStickValue = am.getDx();
-//            }
-//            am.setError(saveSelectedError(), dusStickValue);
-            am.rotationSatelliteOnAcceleration(satellite); // производим вращение спутника
-            if (!isFilterEnabled.isSelected()) {
-                am.rRotationSatelliteOnAcceleration(satellite, false);
-            } else if (countDusStick < 3)
-                am.rRotationSatelliteOnAcceleration(satellite, false); // производим вращение спутника
-            else am.rRotationSatelliteOnAcceleration(satellite, true);
-        } else {
-            am.rotationSatelliteOnAcceleration(satellite); // производим вращение спутника
-            am.rRotationSatelliteOnAcceleration(satellite, false); // производим вращение спутника
-        }
-
-//        am.accelerationFlywheel(satellite); // производим ускорение маховика
-
-        if (isFilterEnabled.isSelected()) {
-            if (countDupStick < 3 && countDusStick < 3)
-                am.rAccelerationFlywheel(satellite, false);
-            else
-                am.rAccelerationFlywheel(satellite, true);
-        } else {
-            am.rAccelerationFlywheel(satellite, false);
-        }
-
-    }
-
-//    public void errorFilteringUnit() {
-//        curX = am.getNormalX();
-//        curDx = am.getNormalDx();
-//        String errorType = errorDetectionModuleDUP(am.getPrevX(), curX, curDx, t);
-////        if (!errorType.equals("")) {
-//            switch (errorType) {
-//                case "dupFailure": {
-//                    x_next = ex + dt * edx;
-//                    break;
-//                }
-//                case "dupStick": {
-//                    x_next = ex + dt * edx;
-////                        if (countTDUPError <= 2) {
-////                    x_next = curX;
-////                        } else {
-////                            x_next = ex + dt * edx;
-////                        }
-//                    p_err_value = curX;
-//                    break;
-//                }
-//                case "dupPomeh": {
-////                    x_next = am.getPrevX();
-//                    x_next = ex + dt * edx;
-//                    break;
-//                }
-//                default: {
-//                        x_next = curX;
-//                    break;
-//                }
-//            }
-////        } else {
-//            errorType = errorDetectionModuleDUS(am.getPrevDx(), curDx, am.getPrevX(), curX, t);
-////            if (!errorType.equals("")) {
-//                switch (errorType) {
-//                    case "dusFailure": {
-//                        dx_next = (x_next - ex) / dt;
-//                        break;
-//                    }
-//                    case "dusStick": {
-////                            if (countTDUSError <= 2) {
-////                        dx_next = curDx;
-////                            } else {
-//                                dx_next = (x_next - ex) / dt;
-////                            }
-//                        s_err_value = curDx;
-//                        break;
-//                    }
-//                    case "dusPomeh": {
-////                        dx_next = am.getPrevDx();
-//                        dx_next = (x_next - ex) / dt;
-//
-//                        break;
-//                    }
-//                    default: {
-//                            dx_next = curDx;
-//                        break;
-//                    }
-//                }
-////            }
-////            else {
-////                x_next = curX;
-////                dx_next = curDx;
-////            }
-////        }
-//    }
-
-    public void valuePickupUnit(double curX, double curDx) {
-
-//        if (!p_err && !s_err) { //сохраняем угол с датчика, если нет ошибки, иначе берём "Эйлеровский"
-////                    prevXm = xm;
-//            xm = curX;
-//        } else {
-//            if (!isFilterEnabled.isSelected()) {
-//                xm = am.getRx();
-//            } else {
-//                if (dupStick && countDupStick < 3) {
-//                    countDupStick++;
-////                        xm = prevXm;
-//                } else if (dupStick && countDupStick == 3) {
-////                        prevXm = xm;
-//                    xm = am.getNormalX();
-//                } else {
-////                        prevXm = xm;
-//                    xm = am.getNormalX();
-//                }
-//            }
-//        }
-//        if (!s_err && !p_err) { //сохраняем угловую скорость с датчика, если нет ошибки, иначе берем"Эйлеровскую"
-////                    prevDxm = dxm;
-//            dxm = curDx;
-//        } else {
-//            if (!isFilterEnabled.isSelected()) {
-//                dxm = am.getRdx();
-//            } else {
-//                if (dusStick && countDusStick < 3) {
-//                    countDusStick++;
-////                        dxm = prevDxm;
-//                } else if (dusStick && countDusStick == 3) {
-////                        prevDxm = dxm;
-//                    dxm = am.getNormalDx();
-//                } else {
-////                        prevDxm = dxm;
-//                    dxm = am.getNormalDx();
-//                }
-//            }
-//        }
-
-        am.setDiscreteRx();
-        am.setDiscreteRdx();
+    public void valuePickupUnit() {
         am.setDiscreteX();
         am.setDiscreteDx();
         am.doDiffDup();
@@ -529,10 +275,8 @@ public class MainController implements Initializable {
         if (isFilterEnabled.isSelected()) {
             am.errorFilteringUnit();
         }
-//        am.doDiffDup();
-//        am.doIntDus();
-
-
+        am.addDiffDup(am.getCurDifDup());
+        am.addIntDus(am.getCurIntDus());
     }
 
 
@@ -574,37 +318,11 @@ public class MainController implements Initializable {
         ydxm_plot.clear();
         ex_plot.clear();
         edx_plot.clear();
-        rx_plot.clear();
-        rdx_plot.clear();
         countDupStick = 0;
         countDusStick = 0;
     }
 
-    public void saveNeshtatAction(ActionEvent actionEvent) {
-        p_err_t = Double.valueOf(tf_DUP_time.getText());
-        s_err_t = Double.valueOf(tf_DUS_time.getText());
-        if (s_err_t > 0) {
-            if (rb_DUS_Failure.isSelected()) {
-                dusFailure = true;
-                dusFailureValue = 1 - (Math.random() / 10000 + 0.9999);
-            } else if (rb_DUS_sticking.isSelected()) dusStick = true;
-            else if (rb_DUS_pomeh.isSelected()) dusPomeh = true;
-        }
-        if (p_err_t > 0) {
-            if (rb_DUP_Failure.isSelected()) {
-                dupFailure = true;
-                dupFailureValue = 1 - (Math.random() / 10000 + 0.9999);
-            } else if (rb_DUP_sticking.isSelected()) dupStick = true;
-            else if (rb_DUP_pomeh.isSelected()) dupPomeh = true;
-        }
-        characteristicsIsChanged = true;
-        am.setP_err_t(p_err_t);
-        am.setS_err_t(s_err_t);
-    }
-
-
     public void showFullGraph(ActionEvent actionEvent) throws IOException {
-
             am = new AngularMotion();
             calculate();
         showGraph(0, x_plot.size(), false);
@@ -636,26 +354,29 @@ public class MainController implements Initializable {
             chartsStage.initOwner(primaryStage);
         }
         if (!cmpEr)
-            chartsController.setGraphsData(x_plot, yv_plot, yx_plot, ydx_plot, yxm_plot, ydxm_plot, minX, maxX, am.getDiffDup(), am.getIntDus(), rx_plot, rdx_plot);
+            chartsController.setGraphsData(x_plot, yv_plot, yx_plot, ydx_plot, yxm_plot, ydxm_plot, minX, maxX, am.getDiffDup(), am.getIntDus());
         else
-            chartsController.setCompareErData(minX, maxX, x_plot, yx_plot, rx_plot, ydx_plot, rdx_plot, yxm_plot, ydxm_plot, am.getDiffDup(), am.getIntDus());
+            chartsController.setCompareErData(minX, maxX, x_plot, yx_plot, ydx_plot, yxm_plot, ydxm_plot, am.getDiffDup(), am.getIntDus());
         chartsController.start();
     }
 
-    private void saveSelectedError() {
+    @FXML
+    private void saveSelectedError(ActionEvent actionEvent) {
         p_err_t = Double.valueOf(tf_DUP_time.getText());
         s_err_t = Double.valueOf(tf_DUS_time.getText());
         if (p_err_t > 0 || s_err_t > 0) {
-            if (rb_DUS_Failure.isSelected()) sensors = new DusFailure(am, p_err_t);
-            else if (rb_DUS_sticking.isSelected()) sensors = new DusStick(am, p_err_t);
-            else if (rb_DUS_pomeh.isSelected()) sensors = new DusPomeh(am, p_err_t);
+            if (rb_DUS_Failure.isSelected()) sensors = new DusFailure(am, s_err_t);
+            else if (rb_DUS_sticking.isSelected()) sensors = new DusStick(am, s_err_t);
+            else if (rb_DUS_pomeh.isSelected()) sensors = new DusPomeh(am, s_err_t);
             else if (rb_DUP_Failure.isSelected()) sensors = new DupFailure(am, p_err_t);
             else if (rb_DUP_sticking.isSelected()) sensors = new DupStick(am, p_err_t);
             else if (rb_DUP_pomeh.isSelected()) sensors = new DupPomeh(am, p_err_t);
         } else sensors = new NormalSensor(am);
+        characteristicsIsChanged = true;
     }
 
     public void showActionGraph(ActionEvent actionEvent) {
+        if (tf_From.getText().isEmpty() || (tf_To.getText()).isEmpty()) return;
         double from = Double.valueOf(tf_From.getText());
         double to = Double.valueOf((tf_To.getText()));
             am = new AngularMotion();
@@ -667,16 +388,9 @@ public class MainController implements Initializable {
         }
     }
 
-    private void saveDUSStickValue(double errorValue) {
-        dusStickValue = errorValue;
-    }
-
-    private void saveDUPStickValue(double errorValue) {
-        dupStickValue = errorValue;
-    }
-
 
     public void showErSection(ActionEvent actionEvent) {
+        if (tf_From.getText().isEmpty() || (tf_To.getText()).isEmpty()) return;
         double from = Double.valueOf(tf_From.getText());
         double to = Double.valueOf((tf_To.getText()));
         System.out.println(isFilterEnabled.isSelected());

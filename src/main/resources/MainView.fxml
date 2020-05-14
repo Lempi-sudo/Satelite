@@ -60,7 +60,7 @@
                   <TextField fx:id="tf_DUS_time" layoutX="489.0" layoutY="275.0" prefHeight="25.0" prefWidth="80.0" />
                   <Label layoutX="636.0" layoutY="249.0" text="Время возникновения [сек]" />
                   <TextField fx:id="tf_DUP_time" layoutX="672.0" layoutY="275.0" prefHeight="25.0" prefWidth="80.0" />
-                  <Button layoutX="598.0" layoutY="325.0" mnemonicParsing="false" onAction="#saveNeshtatAction" text="Save" />
+                  <Button layoutX="598.0" layoutY="325.0" mnemonicParsing="false" onAction="#saveSelectedError" text="Save" />
                   <Button layoutX="143.0" layoutY="173.0" mnemonicParsing="false" onAction="#showAccelerationSection" text="Show acceleration section" />
                   <Button layoutX="155.0" layoutY="232.0" mnemonicParsing="false" onAction="#showBrakingSection" text="Show braking section" />
                   <RadioButton fx:id="rb_DUS_pomeh" layoutX="492.0" layoutY="198.0" mnemonicParsing="false" text="Помеха">
@@ -93,7 +93,7 @@
                      </font>
                   </Label>
                   <Button layoutX="228.0" layoutY="313.0" mnemonicParsing="false" onAction="#showErSection" text="Show error section" />
-                  <CheckBox fx:id="isFilterEnabled" layoutX="172.0" layoutY="26.0" mnemonicParsing="false" selected="true" text="Filter enabled" />
+                  <CheckBox fx:id="isFilterEnabled" layoutX="172.0" layoutY="26.0" mnemonicParsing="false" selected="false" text="Filter enabled" />
                </children></AnchorPane>
       </content>
     </Tab>

@@ -5,14 +5,8 @@ import model.AngularMotion;
 public class DusFailure implements SensorError{
     private AngularMotion am;
 
-    public void setAm(AngularMotion am) {
-        this.am = am;
-    }
     private double s_err_t;
 
-    public void setS_err_t(double s_err_t) {
-        this.s_err_t = s_err_t;
-    }
 
     @Override
     public double getX(double t) {
