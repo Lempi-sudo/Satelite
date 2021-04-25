@@ -1,14 +1,5 @@
 package model;
 
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.TemporalAccessor;
-import java.util.Date;
 
 public class Satellite {
     private double J_z = 20; // момент инерции спутника
@@ -225,9 +216,5 @@ public class Satellite {
         this.dt = dt;
     }
 
-//    public static void main(String[] args) {
-//        java.time.format.DateTimeFormatter formatter1 = java.time.format.DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss S");
-//        System.out.println(formatter1.format(LocalDateTime.now()));
-//        System.out.println((new SimpleDateFormat("yyyy.MM.dd HH:mm:ss S")).format(new Date()));
-//    }
+
 }

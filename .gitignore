@@ -9,3 +9,14 @@ buildNumber.properties
 .mvn/timing.properties
 # https://github.com/takari/maven-wrapper#usage-without-binary-jar
 .mvn/wrapper/maven-wrapper.jar
+/.idea/.gitignore
+/.idea/compiler.xml
+/.idea/jarRepositories.xml
+/.idea/misc.xml
+/.idea/uiDesigner.xml
+/.idea/vcs.xml
+/src/main/java/model/Errors/DupPomeh.java
+/src/main/java/model/Errors/DupStick.java
+/src/main/java/model/Errors/DusPomeh.java
+/src/main/java/model/Errors/DusStick.java
+/src/main/java/model/Errors/NormalSensor.java

@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 public class ChartsController implements Initializable {
-
+// графики строит
     private double T = 1;
     @FXML
     public LineChart<Double,Double> lineChart;
@@ -49,24 +49,34 @@ public class ChartsController implements Initializable {
         series7.setName("Угловая скорость спутника");
 
         int check_T = (int) minX;
+
+        int k = (int) minX;
+        int count = 1;
+        int step = 2;
+
+        int patam=50;
+
         for (int i = (int) minX; i < maxX; ++i) {
-            if (Math.abs(yv_plot.get(i)) < 0.5)
+            if (Math.abs(yv_plot.get(i)) < patam)
                 series1.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), yv_plot.get(i)));
-            if (Math.abs(yxm_plot.get(i)) < 0.5)
-                series2.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), yxm_plot.get(i)));
+            if (Math.abs(yxm_plot.get(i)) < patam)
+                series2.getData().add(new XYChart.Data(String.valueOf(x_plot.get(k)), yxm_plot.get(i)));
             if (i == check_T) {
-                if (Math.abs(edx_plot.get((int) (check_T/T))) < 0.5)
+                if (Math.abs(edx_plot.get((int) (check_T/T))) < patam)
                     series5.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), edx_plot.get((int) (check_T/T))));
-                if (Math.abs(ex_plot.get((int) (check_T/T))) < 0.5)
-                    series3.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), ex_plot.get((int) (check_T/T))));
+                if (Math.abs(ex_plot.get((int) (check_T/T))) < patam)
+                    series3.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), 3*ex_plot.get((int) (check_T/T))));
                 check_T += T;
             }
-            if (Math.abs(ydxm_plot.get(i)) < 0.5)
-                series4.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), ydxm_plot.get(i)));
-            if (Math.abs(yx_plot.get(i)) < 0.5)
+            if (Math.abs(ydxm_plot.get(i)) < patam)
+                series4.getData().add(new XYChart.Data(String.valueOf(x_plot.get(k)), 3*ydxm_plot.get(i)));
+            if (Math.abs(yx_plot.get(i)) < patam)
                 series6.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), yx_plot.get(i)));
-            if (Math.abs(ydx_plot.get(i)) < 0.5)
-                series7.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), ydx_plot.get(i)));
+            if (Math.abs(ydx_plot.get(i)) < patam)
+                series7.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), 3*ydx_plot.get(i)));
+
+            if (count % 2 != 0 && k < maxX) k += step;
+            count++;
 
         }
         lineChart.getData().clear();
