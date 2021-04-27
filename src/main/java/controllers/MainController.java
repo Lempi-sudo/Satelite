@@ -213,7 +213,7 @@ public class MainController implements Initializable {
         saveSelectedError(new ActionEvent());
         am.setSensors(sensors);
         am.setFilterIsEnabled(isFilterEnabled.isSelected());
-        while (am.getW() * satellite.getJ_m() < satellite.getH_max() && t <= 1350) {
+        while (am.getW() * satellite.getJ_m() < satellite.getH_max() && t <= 1350){// Условие когда маховик насытится
             am.setT(t);
                 curX = am.getX();
                 curDx = am.getDx();
@@ -232,6 +232,9 @@ public class MainController implements Initializable {
             i += 1; // следующий цикл
 
         }
+
+
+
         countDupStick = 0;
         countDusStick = 0;
         while (am.getW() > 0 && t <= 1350) { // # пока скорость маховика > 0
@@ -277,6 +280,7 @@ public class MainController implements Initializable {
         }
         am.addDiffDup(am.getCurDifDup());
         am.addIntDus(am.getCurIntDus());
+
     }
 
 

@@ -236,14 +236,17 @@ public class AngularMotion {
 
     public void doDiffDup() {
         diffDup = (dupValue - prevDup) / T;
+
     }
 
     public void addDiffDup(double diffDup) {
+
         difDup.add(diffDup);
     }
 
     public void doIntDus() {
         integralDus += T / 2 * (prevDus + dusValue);
+        System.out.println(integralDus);
     }
 
     public void addIntDus(double integralDus) {

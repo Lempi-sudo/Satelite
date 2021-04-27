@@ -62,8 +62,10 @@ public class ChartsController implements Initializable {
             if (Math.abs(yxm_plot.get(i)) < patam)
                 series2.getData().add(new XYChart.Data(String.valueOf(x_plot.get(k)), yxm_plot.get(i)));
             if (i == check_T) {
-                if (Math.abs(edx_plot.get((int) (check_T/T))) < patam)
-                    series5.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), edx_plot.get((int) (check_T/T))));
+                if (Math.abs(edx_plot.get((int) (check_T/T))) < patam) {
+                    edx_plot.get((int) (check_T / T));
+                    series5.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), edx_plot.get((int) (check_T / T))));
+                }
                 if (Math.abs(ex_plot.get((int) (check_T/T))) < patam)
                     series3.getData().add(new XYChart.Data(String.valueOf(x_plot.get(i)), 3*ex_plot.get((int) (check_T/T))));
                 check_T += T;
